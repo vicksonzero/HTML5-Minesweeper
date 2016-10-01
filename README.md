@@ -1,46 +1,34 @@
-HTML5-Minesweeper
------------------
+# Socketio-Minesweeper
 
-Minesweeper game using jQuery and HTML5 canvas.
+Real-time, Multiplayer MSN-Minesweeper game using socket.io, jQuery and HTML5 canvas.
 
-Online demo can be found here at [joeyvo.me/HTML5-minesweeper](http://joeyvo.me/HTML5-minesweeper/)
+(Forked from https://github.com/Joeynoh/HTML5-Minesweeper)
 
-Now featured on [Chrome Experiments](http://www.chromeexperiments.com/detail/html5-minesweeper)
+![Screenshot](https://github.com/vicksonzero/socketio-Minesweeper/blob/master/screenshots/screenshot01.png)
 
-Follow news and developments on twitter: [@Joeynoh](https://twitter.com/Joeynoh)
+## Play Here
 
-### Current version: 3.0.1
-
-##### New
-- Speed solving, right click on a revealed square
-- Faster mine index algorithm
-- Listener put on mouseup rather than mousedown
-- Retina support (contributed by meltingice)
-- Image preloading
-- Replaced that Github ribbon
-- Game no longer automatically resets after a win or loss
-
-##### Previous versions
-- Brand new and more complete UI
-- Better interaction
-- Custom animations on the playingfield
-- New images
-- Scoreboard and use of local storage for scores
-- Refactoring and optimization
-- Some bug fixes
-- New UI
-- New difficulty features
-- Click on empty square, reveal larger space up until other numbered squares
-- Timer
-- Better grid, using rounded squares
-- Fixed numerous issues like unflagging and clicking after the game has been won or lost
-- Added mine and flag counters
-- Created a reset function so the page no longer needs to refresh to start over
-
-TODO
-----
-- Score algorithm
+https://vicksonzero.github.io/socketio-Minesweeper
 
 
-Inspired by: 
-https://github.com/wbrowne/HTML5-Minesweeper
+## How to play
+
+**Aim**: To discover (click on) more mines than your opponent. This is the opposite of the traditional minesweeper.
+
+1. You and your opponents take turns clicking on a tile that is not opened.
+    1. If it is a mine, you get a point and one more try.
+    2. If it is not a mine,
+        1. It will show how many mines it is touching (1-8)
+        2. If no mine is touching this tile, it will automatically open all touching tiles, causing a chain reaction
+2. The game ends when a player finds more than 50% mines
+
+## How to use
+
+    $ git clone https://github.com/vicksonzero/socketio-Minesweeper.git
+    $ npm install
+    $ npm start
+
+## License
+
+The MIT License (MIT)
+Copyright (c) 2016 Chui Hin Wah
