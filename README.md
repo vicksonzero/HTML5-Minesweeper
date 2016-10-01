@@ -4,11 +4,12 @@ Real-time, Multiplayer MSN-Minesweeper game using socket.io, jQuery and HTML5 ca
 
 (Forked from https://github.com/Joeynoh/HTML5-Minesweeper)
 
-![Screenshot](https://github.com/vicksonzero/socketio-Minesweeper/blob/master/screenshots/screenshot01.png)
 
 ## Play Here
 
 https://vicksonzero.github.io/socketio-Minesweeper
+
+![Screenshot](https://github.com/vicksonzero/socketio-Minesweeper/blob/master/screenshots/screenshot01.png)
 
 
 ## How to play
@@ -24,11 +25,20 @@ https://vicksonzero.github.io/socketio-Minesweeper
 
 ## How to use
 
+### Set up (production)
+
     $ git clone https://github.com/vicksonzero/socketio-Minesweeper.git
     $ npm install
     $ npm start
 
+### End points
+
+1. `GET /` starts a new game
+2. `GET /?token=TOKEN` joins a game with a token.
+3. `GET /newRoom` starts a new game
+4. `GET /rooms` lists all games
+
 ## License
 
-The MIT License (MIT)
+The MIT License (MIT)  
 Copyright (c) 2016 Chui Hin Wah
