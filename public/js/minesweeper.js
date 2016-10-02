@@ -19,7 +19,7 @@ $(function () {
   } else {
     console.log('token', params.token[0]);
   }
-  if (params.fd !== undefined){
+  if (params.fd !== undefined) {
     $('#invite-link').val(location.protocol + '//' + location.host + location.pathname + '?token=' + params.fd[0]);
   }
 
@@ -56,7 +56,10 @@ $(function () {
     var revealed = data.revealed;
     var flag = data.flag;
     var masked = data.masked;
+    var players = data.players;
+    var turn = data.turn;
 
+    util.updateScoreboard(players, turn);
     for (var i = 0; i < globals.squaresX; i++) {
       for (var j = 0; j < globals.squaresY; j++) {
         if (revealed[i][j] != globals.revealedMap[i][j]) {
@@ -346,7 +349,7 @@ $(function () {
         globals.mineMap[k] = Array(globals.squaresY);
       }
 
-      scores.display();
+      // scores.display();
 
       // Make sure proper styles are set
       globals.context.strokeStyle = defaults.celStroke;
@@ -478,10 +481,11 @@ $(function () {
 
       if (!globals.gameover) {
         // Calculate x & y relevant to the cel size, also (l) check if current x,y combo has already been revealed
-        var x = Math.floor((e.pageX - globals.canvas[0].offsetLeft - 1) / defaults.celSize),
-          y = Math.floor((e.pageY - globals.canvas[0].offsetTop - 1) / defaults.celSize),
-          l = (globals.revealedMap[x][y]) ? 1 : -1,
-          f = (globals.flagMap[x][y]) ? 1 : -1;
+        var x = Math.floor((e.pageX - globals.canvas[0].offsetLeft - 1) / defaults.celSize);
+        var y = Math.floor((e.pageY - globals.canvas[0].offsetTop - 1) / defaults.celSize);
+        if (!globals.revealedMap[x]) return;
+        var l = (globals.revealedMap[x][y]) ? 1 : -1;
+        var f = (globals.flagMap[x][y]) ? 1 : -1;
 
         var pX = globals.previous[0],
           pY = globals.previous[1];
@@ -623,7 +627,7 @@ $(function () {
         globals.gameover = true;
         containers.status.html('You won! :D');
 
-        scores.save();
+        // scores.save();
 
         // Stops the timer and counts down to a reset of the game
         window.clearInterval(globals.clock);
@@ -790,50 +794,50 @@ $(function () {
   // --- Scores Functions ---
   /* =========================================== */
 
-  var scores = {
+  // var scores = {
 
-    display: function () {
+  //   display: function () {
 
-      if (typeof Storage !== 'undefined') {
+  //     if (typeof Storage !== 'undefined') {
 
-        //delete localStorage.scores;
+  //       //delete localStorage.scores;
 
-        if (typeof localStorage.scores !== 'undefined') {
+  //       if (typeof localStorage.scores !== 'undefined') {
 
-          var lScores = JSON.parse(localStorage.scores);
+  //         var lScores = JSON.parse(localStorage.scores);
 
-          containers.scoreboard.html('<tr><th>Name</th><th>Mines</th><th>Seconds</th></tr>');
+  //         containers.scoreboard.html('<tr><th>Name</th><th>Mines</th><th>Seconds</th></tr>');
 
-          $.each(lScores, function () {
-            containers.scoreboard.append('<tr><td>' + this[0] + '</td><td>' + this[2] + '</td><td>' + this[3] + '</td></tr>');
-          });
+  //         $.each(lScores, function () {
+  //           containers.scoreboard.append('<tr><td>' + this[0] + '</td><td>' + this[2] + '</td><td>' + this[3] + '</td></tr>');
+  //         });
 
-        } else {
+  //       } else {
 
-          containers.scoreboard.html('<tr><td>You have not won any games yet :(</td></tr>');
-        }
+  //         containers.scoreboard.html('<tr><td>You have not won any games yet :(</td></tr>');
+  //       }
 
-      } else {
-        containers.scoreboard.html('<tr><td>Unfortunately, your browser does not support local storage</td></tr>');
-      }
+  //     } else {
+  //       containers.scoreboard.html('<tr><td>Unfortunately, your browser does not support local storage</td></tr>');
+  //     }
 
-    },
+  //   },
 
-    save: function () {
+  //   save: function () {
 
-      if (typeof Storage !== 'undefined') {
+  //     if (typeof Storage !== 'undefined') {
 
-        var name = prompt('Your score is being stored. Please enter your name', 'Name'),
-          score = [name, 'Insane', globals.totalMines, globals.elapsedTime, 10000];
+  //       var name = prompt('Your score is being stored. Please enter your name', 'Name'),
+  //         score = [name, 'Insane', globals.totalMines, globals.elapsedTime, 10000];
 
-        var scores = (typeof localStorage.scores !== 'undefined') ? JSON.parse(localStorage.scores) : new Array();
+  //       var scores = (typeof localStorage.scores !== 'undefined') ? JSON.parse(localStorage.scores) : new Array();
 
-        scores.push(score);
-        localStorage.scores = JSON.stringify(scores);
-      }
-    }
+  //       scores.push(score);
+  //       localStorage.scores = JSON.stringify(scores);
+  //     }
+  //   }
 
-  };
+  // };
 
   /* =========================================== */
   // --- Animation Functions ---
@@ -1045,6 +1049,23 @@ $(function () {
       } else {
         return false;
       }
+    },
+    updateScoreboard: function (players, turn) {
+      players.forEach(function (elem, index, array) {
+        var $player = $('.player' + index);
+        console.log($player);
+        
+        if (index === turn) {
+          $player.css("background-color", "yellow");
+        }else{
+          $player.css("background-color", "white");
+        }
+        $player.find('.name').html(elem.name);
+        $player.find('.score').html(elem.score);
+        $player.find('.bombs').html(elem.bombs);
+
+
+      }, this);
     }
   };
 

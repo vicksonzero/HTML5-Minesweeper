@@ -137,17 +137,25 @@ exports.init = function () {
       var y = data.y;
 
       var room = roomManager.getRoomByToken(token);
-      console.log('room' + room.id + ", click " + who + '(' + x + ', ' + y + ')');
+      console.log('room' + room.id + ': [' + who + '] clicks ' + '(' + x + ', ' + y + ')');
 
-      if (room.game.globals.turn == who) {
-        room.game.action.index(x, y);
-        var state = room.game.util.getState();
-        // console.log(state);
-        console.log(room.game.globals.players[0], room.game.globals.players[1]);
-        console.log(state.masked);
-        io.to(room.id).emit('state', state);
-      } else {
+      if (room.game.globals.turn != who) {
         console.log('not his turn');
+      } else {
+        // reveal the position
+        var hasMine = room.game.action.index(x, y);
+        if (hasMine === -1) {
+          console.log('invalid space');
+
+        } else {
+          // pass the turn if no mine is found
+          // TODO: game logic should be inside game.js
+          if (hasMine === 0) {
+            room.game.globals.turn = (room.game.globals.turn + 1) % 2;
+          }
+          sendState(room);
+        }
+
       }
     });
 
@@ -163,9 +171,26 @@ exports.init = function () {
     };
     io.sockets.connected[socket.id].emit('init', welcomePack);
 
-    var state = room.game.util.getState();
-    io.sockets.connected[socket.id].emit('state', state);
+    sendState(room);
   });
+
+  function sendState(room) {
+
+    var state = room.game.util.getState();
+    // console.log(state);
+    console.log(room.game.globals.players[0], room.game.globals.players[1]);
+    var players = room.game.globals.players.map(function (player) {
+      return {
+        name: player.name,
+        score: player.score,
+        bombs: player.bombs
+      }
+    });
+    state.players = players;
+    state.turn = room.game.globals.turn;
+    console.log(state.masked);
+    io.to(room.id).emit('state', state);
+  }
 
 };
 

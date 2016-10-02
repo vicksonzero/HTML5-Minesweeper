@@ -316,65 +316,12 @@ function Game() {
       // If left-click, not a flag and the game is still going on
       if (e.which === 1 && globals.flagMap[x][y] !== 1 && defaults.difficulty !== 0) {
 
-        // Is this the first click of the game?
-        // if (globals.firstClick === true) {
-
-        //   clearInterval(globals.currentAnimation);
-        //   // animation.standardBoard();
-
-        //   // Set difficulty, based on default and difficulty selector, and start the timer
-        //   //defaults.difficulty = containers.difficulty.val();
-        //   core.timer();
-
-        //   // Keep generating possible minemaps till one is generate where the square first clicked is not a mine
-        //   do {
-        //   } while (globals.mineMap[x][y] === -1);
-
-        //   // Set number of mines
-        //   // containers.mines.html('You have to find ' + globals.totalMines + ' mines to win.');
-        //   globals.firstClick = false;
-        // }
 
         // Activate index function. See below for more details
-        action.index(x, y);
-
-        // If middle-click and a revealed square
-        // } else if (e.which === 3 && util.is('revealed', x, y)) {
-
-        //   // Calculate number of surrounding mines
-        //   var num = 0,
-        //     surrounded = new Array(),
-        //     xArr = [x, x + 1, x - 1],
-        //     yArr = [y, y + 1, y - 1];
-
-        //   for (var a = 0; a < 3; a++) {
-        //     for (var b = 0; b < 3; b++) {
-
-        //       if (util.is('flag', xArr[a], yArr[b])) {
-        //         num++;
-        //       } else {
-        //         surrounded.push([xArr[a], yArr[b]]);
-        //       }
-        //     }
-        //   }
-
-        //   // Compare with number of actual mines
-        //   if (num === globals.mineMap[x][y]) {
-        //     $.each(surrounded, function () {
-        //       // Remove non-flagged squares, using action.index	
-        //       action.index(this[0], this[1]);
-        //     });
-        //   }
-
-        // If right-click, game is not over, square has not been revealed and this is not the first click	
-        // } else if (e.which === 3 && revealed < 0 && globals.firstClick !== true) {
-
-        //   // Flag the square
-        //   var flag = new Image();
-        //   flag.src = defaults.flagImg;
-        //   flag.onload = function () {
-        //     action.flag(flag, x, y);
-        //   };
+        var hasMine = action.index(x, y);
+        if (hasMine === 0) {
+          globals.turn = (globals.turn + 1) % 2;
+        }
       }
     },
 
@@ -415,82 +362,56 @@ function Game() {
     // -- Index function
     // -- Used to determine whether square is a mine
     // -- or not 
-    // -- @return void
+    // -- @return -1 if not applicable, 0 if no mine, >0 if have found mine
     /* ------------------------------------------- */
 
     index: function (x, y) {
 
-      // If square is not revealed, is within boundaries and exists
-      if (x >= 0 && y >= 0 && x <= globals.squaresX && y <= globals.squaresY && globals.mineMap[x] !== undefined) {
+      // If invalid
+      // i.e. square is not revealed, is within boundaries and exists
+      // return -1
+      if (
+        x < 0 || y < 0 ||
+        x > globals.squaresX || y > globals.squaresY ||
+        util.is('revealed', x, y) ||
+        globals.mineMap[x] === undefined
+      ) {
+        return -1;
+      }
 
-        var revealed = !!(globals.revealedMap[x][y]);
+      // else
 
-        if (!util.is('revealed', x, y)) {
+      // Add revealed square to the revealed array
+      globals.revealedMap[x][y] = 1;
 
-          // Add revealed square to the revealed array
-          globals.revealedMap[x][y] = 1;
+      // if there is a mine here
+      if (globals.mineMap[x][y] === -1) {
+        // add score
+        globals.players[globals.turn].score++;
+        return 1;
+        // changes will be propergated later
 
-          // if there is no mine here
-          if (globals.mineMap[x][y] !== -1) {
-            // 'remove square', by drawing a white one over it
-            var alpha = 0.1;
-            var squareFade = setInterval(function () {
-              // globals.context.strokeStyle = 'white';
-              // globals.context.fillStyle = 'rgba(255,255,255,' + alpha + ')';
-              // util.roundRect(x, y);
+        // if not a mine and no surrounding mines
+      } else if (globals.mineMap[x][y] === 0) {
 
-              if (globals.mineMap[x][y] !== -1) {
-
-                // Default colors for the index numbers in an array. [0] not having a color.
-                var colorMap = ['none', 'blue', 'green', 'red', 'black', 'orange', 'cyan'];
-                // globals.context.fillStyle = colorMap[globals.mineMap[x][y]];
-                // globals.context.fillText(globals.mineMap[x][y], (x * defaults.celSize) + 5, (y * defaults.celSize) + 16);
-              }
-
-              alpha = alpha + .1;
-
-              if (alpha > 1) {
-                clearInterval(squareFade);
-              }
-            }, 50);
-            globals.turn = (globals.turn + 1) % 2;
-            // If the square that was clicked has no surrounding mines...
-          } else {
-
-            // If unforutantely there is mine, display it and trigger the function leading to the end of the game
-            // var mine = new Image();
-            // mine.src = defaults.mineImg;
-            // mine.onload = function () {
-            var mine = null;
-            action.revealMine(mine, x, y);
-            // };
-            globals.players[globals.turn].score++;
-          }
-
-          if (globals.mineMap[x][y] === 0) {
-
-            // remove all neighbors till squares are found that do have surrounding mines
-            for (var i = -1; i <= 1; i++) {
-              for (var j = -1; j <= 1; j++) {
-                // If a neighboring square is also not surrounded by mines, remove his neighbors also; and repeat
-                if (!revealed && x + i >= 0 && y + j >= 0 && x + i <= globals.squaresX && y + j <= globals.squaresX) {
-                  action.index(x + i, y + j);
-                }
-              }
-            }
-            globals.turn = (globals.turn + 1) % 2;
-
-            // If the square does not cover a mine, display the index number
+        // remove all neighbors till squares are found that do have surrounding mines
+        for (var i = -1; i <= 1; i++) {
+          for (var j = -1; j <= 1; j++) {
+            action.index(x + i, y + j);
           }
         }
 
-        var data = {
-          x,
-          y,
-          newVal: null
-        };
-        signals.updated.dispatch(data);
+      } else {
+        // just reveal it
       }
+
+      var data = {
+        x,
+        y,
+        newVal: globals.mineMap[x][y]
+      };
+      signals.updated.dispatch(data);
+      return 0;
     },
 
     /* ------------------------------------------- */
