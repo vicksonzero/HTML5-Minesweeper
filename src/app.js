@@ -3,27 +3,20 @@
 var socketIO = require("socket.io");
 var path = require('path');
 
-var HTTP_PORT = 80;
-var WS_PORT = 3000;
+var WS_PORT = 3008;
 
 var RoomManager = require('./RoomManager');
 var roomManager = new RoomManager();
 
 var express = require("express");
-var app = express();
+var router = express.Router();
 // var fs = require("fs");
 
-exports.init = function () {
-  var http = require("http").Server(app);
 
-  http.listen(HTTP_PORT, () => {
-    console.log('HTTP listening on', HTTP_PORT);
-    console.log('WS   listening on', WS_PORT);
-  });
-
-
-  app.get('/', function (req, res) {
-    var host = req.get('host');
+function init() {
+  router.get('/', function (req, res) {
+    var requestPath = req.baseUrl;
+    console.log(requestPath);
     console.log('GET / token is ', req.query.token);
 
     // if player comes with no token
@@ -41,14 +34,14 @@ exports.init = function () {
       );
 
       var token = newRoom.game.globals.players[0].token;
-      res.redirect('/?token=' + token);
+      res.redirect(requestPath + '/?token=' + token);
       return;
     }
 
     res.sendFile(path.resolve('public/index.html'));
   });
 
-  app.get('/newRoom', function (req, res, next) {
+  router.get('/newRoom', function (req, res, next) {
     var host = req.get('host');
     var newRoom = roomManager.newRoom(
       function (newRoom) {
@@ -75,16 +68,17 @@ exports.init = function () {
     res.json(result);
   });
 
-  app.get('/token', function (req, res, next) {
+  router.get('/token', function (req, res, next) {
     var result = {
       token: 0
     };
     res.json(result);
   });
 
-  app.get('/rooms', function (req, res, next) {
+  router.get('/rooms', function (req, res, next) {
     var host = req.get('host');
-    var newRoomLink = req.protocol + '://' + host + '/newRoom';
+    var baseUrl = req.baseUrl;
+    var newRoomLink = req.protocol + '://' + host + baseUrl + '/newRoom';
     var rooms = roomManager.getRooms();
     res.send(
       '<p>' +
@@ -97,7 +91,7 @@ exports.init = function () {
             (room.game.globals.players
               .map(function (player) {
                 return {
-                  tokenLink: req.protocol + '://' + host + '?token=' + player.token
+                  tokenLink: req.protocol + '://' + host + baseUrl + '/?token=' + player.token
                 };
               })
               .map(function (player) {
@@ -111,12 +105,13 @@ exports.init = function () {
     )
   });
 
-  app.use(express.static(path.resolve('public')));
+  router.use('/', express.static(path.resolve('public')));
 
-  app.use('/assets', express.static(__dirname + '/../assets'));
+  router.use('/assets', express.static(__dirname + '/../assets'));
 
-  var io = socketIO.listen(http);
 
+  // var socketIO = require("socket.io");
+  var io = socketIO.listen(WS_PORT);
 
   io.on("connection", function (socket) {
     var query = socket.handshake.query;
@@ -207,8 +202,10 @@ exports.init = function () {
     console.log(state.masked);
     io.to(room.id).emit('state', state);
   }
+  return router;
+}
 
-};
+module.exports = init;
 
 function makeTokenUrl(token) {
   return + HTTP_PORT + '?token=' + token;

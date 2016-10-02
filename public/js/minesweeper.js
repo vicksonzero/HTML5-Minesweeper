@@ -20,15 +20,18 @@ $(function () {
     console.log('token', params.token[0]);
   }
 
-  var socket = io.connect({
-    query: [
-      "&token=" + params.token[0],
-    ].join(""),
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    reconnectionAttempts: 5,
-  });
+  var socket = io.connect(
+    WS_HOST + ':' + WS_PORT,
+    {
+      query: [
+        "&token=" + params.token[0],
+      ].join(""),
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+    }
+  );
 
 
   socket.on('connect', function () {
