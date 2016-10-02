@@ -11,16 +11,13 @@ $(function () {
 
 
   var params = parseURLParam();
-  console.log(params);
+  // console.log(params);
   if (params.token[0] === undefined) {
-    console.log('no token error');
+    console.error('no token error');
     document.write('no token error');
     return;
   } else {
     console.log('token', params.token[0]);
-  }
-  if (params.fd !== undefined) {
-    $('#invite-link').val(location.protocol + '//' + location.host + location.pathname + '?token=' + params.fd[0]);
   }
 
   var socket = io.connect({
@@ -39,12 +36,17 @@ $(function () {
   });
 
   socket.on('init', function (data) {
-    console.log('init()');
+    // console.log('init()');
     globals.who = data.who;
+    globals.fdToken = data.fd;
+    util.updateFdToken();
   });
 
   socket.on('disconnect', function () {
     console.log('disconnected');
+    $('#invite').hide();
+    $('#instructions').hide();
+    $('#disconnected').show()
   });
 
   socket.on('reconnecting', function (trialCount) {
@@ -52,7 +54,7 @@ $(function () {
   });
 
   socket.on('state', function (data) {
-    console.log(data);
+    // console.log(data);
     var revealed = data.revealed;
     var flag = data.flag;
     var masked = data.masked;
@@ -63,7 +65,7 @@ $(function () {
     for (var i = 0; i < globals.squaresX; i++) {
       for (var j = 0; j < globals.squaresY; j++) {
         if (revealed[i][j] != globals.revealedMap[i][j]) {
-          console.log("diff globals.revealedMap[" + i + "][" + j + "]:" + globals.revealedMap[i][j] + ' ->' + revealed[i][j]);
+          // console.log("diff globals.revealedMap[" + i + "][" + j + "]:" + globals.revealedMap[i][j] + ' ->' + revealed[i][j]);
           globals.revealedMap[i][j] = revealed[i][j];
         }
       }
@@ -78,7 +80,7 @@ $(function () {
     for (var i = 0; i < globals.squaresX; i++) {
       for (var j = 0; j < globals.squaresY; j++) {
         if (flag[i][j] != globals.flagMap[i][j]) {
-          console.log("diff globals.flagMap[" + i + "][" + j + "]:" + globals.flagMap[i][j] + ' -> ' + flag[i][j]);
+          // console.log("diff globals.flagMap[" + i + "][" + j + "]:" + globals.flagMap[i][j] + ' -> ' + flag[i][j]);
           globals.flagMap[i][j] = flag[i][j];
         }
       }
@@ -87,7 +89,7 @@ $(function () {
       for (var j = 0; j < globals.squaresY; j++) {
         var newVal = masked[i][j];
         if (newVal !== globals.maskedMap[i][j]) {
-          console.log("diff globals.maskedMap[" + i + "][" + j + "]:" + globals.maskedMap[i][j] + ' -> ' + newVal);
+          // console.log("diff globals.maskedMap[" + i + "][" + j + "]:" + globals.maskedMap[i][j] + ' -> ' + newVal);
           globals.mineMap[i][j] = newVal;
           if (newVal === '') {
             // do nothing
@@ -108,6 +110,7 @@ $(function () {
 
   var globals = {
     token: params.token[0],
+    fdToken: '',
     firstClick: true,
     gameover: false,
     canvas: null,
@@ -181,7 +184,8 @@ $(function () {
 
     init: function () {
       if (globals.token === undefined) {
-        console.log('no token');
+        console.error('error: no token');
+        return;
       }
       globals.canvas = $('#board');
       globals.context = globals.canvas[0].getContext("2d");
@@ -205,8 +209,10 @@ $(function () {
       globals.context.font = defaults.font;
 
       defaults.width = globals.canvas.width();
-      globals.squaresX = Math.floor(defaults.width / defaults.celSize);
-      globals.squaresY = Math.floor(defaults.height / defaults.celSize);
+      // globals.squaresX = Math.floor(defaults.width / defaults.celSize);
+      // globals.squaresY = Math.floor(defaults.height / defaults.celSize);
+      globals.squaresX = 16;
+      globals.squaresY = 16;
 
       globals.mineMap = new Array(globals.squaresX);
       globals.flagMap = new Array(globals.squaresX);
@@ -298,7 +304,7 @@ $(function () {
     /* ------------------------------------------- */
 
     reset: function () {
-      console.log("reset()");
+      // console.log("reset()");
       // Clear the timer
       window.clearInterval(globals.clock);
       window.clearInterval(globals.restart);
@@ -395,9 +401,11 @@ $(function () {
       }
 
       // Calculate x & y relevant to the cel size, also (l) check if current x,y combo has already been revealed
-      var x = Math.floor((e.pageX - globals.canvas[0].offsetLeft - 1) / defaults.celSize),
-        y = Math.floor((e.pageY - globals.canvas[0].offsetTop - 1) / defaults.celSize),
-        revealed = (globals.revealedMap[x][y]) ? 1 : -1;
+      var x = Math.floor((e.pageX - globals.canvas[0].offsetLeft - 1) / defaults.celSize);
+      var y = Math.floor((e.pageY - globals.canvas[0].offsetTop - 1) / defaults.celSize);
+      if (!globals.revealedMap[x]) return;
+      
+      var revealed = (globals.revealedMap[x][y]) ? 1 : -1;
 
       // If left-click, not a flag and the game is still going on
       // if (e.which === 1 && globals.flagMap[x][y] !== 1 && defaults.difficulty !== 0) {
@@ -536,7 +544,7 @@ $(function () {
             action.revealMine(x, y);
 
             globals.players[globals.turn].score++;
-            console.log(globals.players[0], globals.players[1]);
+            // console.log(globals.players[0], globals.players[1]);
           }
 
           if (globals.mineMap[x][y] === 0) {
@@ -1051,9 +1059,10 @@ $(function () {
       }
     },
     updateScoreboard: function (players, turn) {
+      var allOnline = true;
       players.forEach(function (elem, index, array) {
         var $player = $('.player' + index);
-        console.log($player);
+        // console.log($player);
 
         if (index === turn) {
           $player.css("background-color", "yellow");
@@ -1064,9 +1073,31 @@ $(function () {
         $player.find('.score').html(elem.score);
         $player.find('.bombs').html(elem.bombs);
         $player.find('.isOnline').html(elem.isOnline ? "yes" : "no");
-
+        allOnline = allOnline && elem.isOnline;
 
       }, this);
+      if (allOnline) {
+        $('#invite').hide()
+          .find('h1')
+          .html('Resume Game');
+        $('#disconnected').hide()
+        var instruction = (turn == globals.who ? "Your turn" : "Waiting for opponent...");
+        $('#instructions').show()
+          .find('h1')
+          .html(instruction);
+      } else {
+        $('#invite').show();
+        $('#instructions').hide();
+        $('#disconnected').hide()
+      }
+    },
+    updateFdToken: function () {
+      if (globals.fdToken) {
+        $('#invite-link').val(location.protocol + '//' + location.host + location.pathname + '?token=' + globals.fdToken);
+      } else {
+        $('#invite-link').val('');
+      }
+
     }
   };
 

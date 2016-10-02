@@ -28,7 +28,7 @@
 			</div>
 		</header>
 		<section class="row">
-			<div class="eightcol">
+			<div class="sixcol">
 				<canvas id="board" width="400" height="400" oncontextmenu="return false;">
 					<p>Unfortunately, your browser does not seem to support the canvas element.</p>
 				</canvas>
@@ -37,33 +37,44 @@
 					<p>Unfortunately, your javascript is disabled. You will need to enable it in order to play the game.</p>
 				</noscript>
 			</div>
-			<div class="fourcol last">
+			<div class="fourcol">
 				<div class="startscreen">
-					<h1>Start Game</h1>
-					<p>Send this link to your friend:</p>
-					<input type="text" id="invite-link" value="" />
+					<div id="invite">
+						<h1>Start Game</h1>
+						<p>Send this link to your friend:</p>
+						<input type="text" id="invite-link" value="" />
+					</div>
+
+					<div id="instructions" style="display:none;">
+						<h1>Waiting for Opponent...</h1>
+						<table id="scoreboard">
+							<tr>
+								<th>Name</th>
+								<th>Score</th>
+								<th>Bombs</th>
+								<th>Online</th>
+							</tr>
+							<tr class="player0">
+								<td class="name"></td>
+								<td class="score"></td>
+								<td class="bombs"></td>
+								<td class="isOnline"></td>
+							</tr>
+							<tr class="player1">
+								<td class="name"></td>
+								<td class="score"></td>
+								<td class="bombs"></td>
+								<td class="isOnline"></td>
+							</tr>
+						</table>
+					</div>
+
+					<div id="disconnected" style="display:none;">
+						<h1>Disconnected from server</h1>
+						<a href="/">Retry (Open a new room)</a>
+					</div>
 
 
-					<table id="scoreboard">
-						<tr>
-							<th>Name</th>
-							<th>Score</th>
-							<th>Bombs</th>
-							<th>Online</th>
-						</tr>
-						<tr class="player0">
-							<td class="name"></td>
-							<td class="score"></td>
-							<td class="bombs"></td>
-							<td class="isOnline"></td>
-						</tr>
-						<tr class="player1">
-							<td class="name"></td>
-							<td class="score"></td>
-							<td class="bombs"></td>
-							<td class="isOnline"></td>
-						</tr>
-					</table>
 
 				</div>
 
@@ -71,8 +82,8 @@
 		</section>
 		<footer class="row" style="line-height: 2em;">
 			<p>
-				MSN-Sweeper By Dickson Chui (<a href="https://github.com/vicksonzero">vicksonzero</a>) <br />
-				<a href="http://dickson.md">http://dickson.md</a>
+				MSN-Sweeper By Dickson Chui (<a href="https://github.com/vicksonzero">vicksonzero</a>) |
+				Website: <a href="http://dickson.md">http://dickson.md</a>
 			</p>
 			<p>
 				Forked from <a href="https://github.com/Joeynoh/HTML5-Minesweeper">https://github.com/Joeynoh/HTML5-Minesweeper</a>

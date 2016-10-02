@@ -41,8 +41,8 @@ exports.init = function () {
       );
 
       var token = newRoom.game.globals.players[0].token;
-      var fdToken = newRoom.game.globals.players[1].token;
-      res.redirect('/?token=' + token + '&fd=' + fdToken);
+      res.redirect('/?token=' + token);
+      return;
     }
 
     res.sendFile(path.resolve('public/index.html'));
@@ -162,7 +162,7 @@ exports.init = function () {
     });
 
     socket.on("disconnect", function () {
-      console.log("disconnected: " + socket.id);
+      console.log("disconnected: " + socket.id + ", token: " + token);
       var room = roomManager.getRoomByToken(token);
       var playerID = roomManager.getPlayerIDByToken(token);
       room.game.globals.players[playerID].isOnline = false;
@@ -177,8 +177,12 @@ exports.init = function () {
     var playerID = roomManager.getPlayerIDByToken(token);
     room.game.globals.players[playerID].isOnline = true;
 
+    var fdPlayerID = (playerID + 1) % 2;
+    var fdToken = room.game.globals.players[fdPlayerID].token;
+
     var welcomePack = {
-      who: roomManager.getPlayerIDByToken(token)
+      who: playerID,
+      fd: fdToken
     };
     io.sockets.connected[socket.id].emit('init', welcomePack);
 
@@ -189,7 +193,7 @@ exports.init = function () {
 
     var state = room.game.util.getState();
     // console.log(state);
-    console.log(room.game.globals.players[0], room.game.globals.players[1]);
+    // console.log(room.game.globals.players[0], room.game.globals.players[1]);
     var players = room.game.globals.players.map(function (player) {
       return {
         name: player.name,

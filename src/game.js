@@ -114,8 +114,10 @@ function Game() {
       // globals.context.font = defaults.font;
 
       // defaults.width = globals.canvas.width();
-      globals.squaresX = Math.floor(defaults.width / defaults.celSize);
-      globals.squaresY = Math.floor(defaults.height / defaults.celSize);
+      // globals.squaresX = Math.floor(defaults.width / defaults.celSize);
+      // globals.squaresY = Math.floor(defaults.height / defaults.celSize);
+      globals.squaresX = 16;
+      globals.squaresY = 16;
       console.log(globals.squaresX, globals.squaresY);
 
       globals.mineMap = new Array(globals.squaresX);
@@ -261,7 +263,6 @@ function Game() {
         globals.flagMap[k] = Array(globals.squaresY);
         globals.revealedMap[k] = Array(globals.squaresY);
       }
-      console.log(globals.revealedMap);
 
       // scores.display();
 
