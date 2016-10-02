@@ -23,6 +23,7 @@ http://dickson.md/msnSweeper/
         2. If no mine is touching this tile, it will automatically open all touching tiles, causing a chain reaction
 2. The game ends when a player finds more than 50% mines
 
+
 ## How to use
 
 ### Set up (production)
@@ -31,12 +32,51 @@ http://dickson.md/msnSweeper/
     $ npm install
     $ npm start
 
+
 ### End points
 
 1. `GET /` starts a new game, join it and show a link for the other player
 2. `GET /?token=TOKEN` joins a game with a token.
 3. `GET /newRoom` starts a new game, returns JSON
 4. `GET /rooms` lists all games
+
+
+## Advanced
+
+### Nested Express modules
+
+`src/app.js` is in fact an `express.Router`. It means that you can do the following:
+
+    var express = require('express');
+    var app = express();
+    const msnSweeper = require('src/app');
+    app.use('/msnSweeper/', msnSweeper);
+
+and serve msnSweeper inside another express module.
+
+
+### Auto-resume / kill rooms
+
+Game rooms are open by going to `GET /`, and is maintained as long as 1 of the players are still in the room.
+
+Unfortunately, once both players leave the room, it is immediately destroyed.
+
+
+### Socket.io and DigitalOcean
+
+I have no idea why, but you need to fill in actual ip address for socket.io stuff to work on DigitalOcean.
+
+
+## Roadmap
+
+1. Use bootstrap
+1. clean up commented unused code
+
+
+## Contribution
+
+Please open issues and/or pull requests. I am more than happy to follow-up.
+
 
 ## License
 

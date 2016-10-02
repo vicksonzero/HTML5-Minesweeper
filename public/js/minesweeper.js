@@ -21,7 +21,7 @@ $(function () {
   }
 
   var socket = io.connect(
-    WS_HOST + ':' + WS_PORT,
+    '127.0.0.1:3010',
     {
       query: [
         "&token=" + params.token[0],
