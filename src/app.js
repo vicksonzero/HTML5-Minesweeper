@@ -3,7 +3,7 @@
 var socketIO = require("socket.io");
 var path = require('path');
 
-var WS_PORT = 3008;
+var WS_PORT = 3010;
 
 var RoomManager = require('./RoomManager');
 var roomManager = new RoomManager();
@@ -38,7 +38,7 @@ function init() {
       return;
     }
 
-    res.sendFile(path.resolve('public/index.html'));
+    res.sendFile(path.join(__dirname, '../public/index.html'));
   });
 
   router.get('/newRoom', function (req, res, next) {
@@ -87,7 +87,7 @@ function init() {
       '</p>' +
       (rooms
         .map(function (room) {
-          return 'Room ' + room.id + ' (mines: ' + room.game.globals.totalMines + ')' + ':<br />' +
+          return 'Room ' + room.id + ' (mines: ' + room.game.globals.totalFlags + ' / ' + room.game.globals.totalMines + ')' + ':<br />' +
             (room.game.globals.players
               .map(function (player) {
                 return {
@@ -105,14 +105,19 @@ function init() {
     )
   });
 
-  router.use('/', express.static(path.resolve('public')));
+  router.get('/socket.io/socket.io.js', function (req, res){
+    console.log('socket haha');
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, '../node_modules/socket.io-client/socket.io.js'));
+  });
+  router.use('/', express.static(path.join(__dirname, '../public')));
 
   router.use('/assets', express.static(__dirname + '/../assets'));
 
 
   // var socketIO = require("socket.io");
   var io = socketIO.listen(WS_PORT);
-
+  console.log('listening to: ', WS_PORT);
   io.on("connection", function (socket) {
     var query = socket.handshake.query;
     var token = query.token;
