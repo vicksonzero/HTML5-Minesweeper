@@ -53,6 +53,7 @@ function Game() {
 
   var defaults = {
     difficulty: 0,
+    mineCount: 51,
     celSize: 20,
     width: 400,
     height: 400,
@@ -238,8 +239,8 @@ function Game() {
       // Initialize the board
       core.setup();
 
-      defaults.difficulty = 9;
-      action.generateMines(globals.mineMap);
+      defaults.mineCount = 51;
+      action.generateMines();
       console.log(globals.mineMap);
       console.log('total mines: ', globals.totalMines);
 
@@ -390,6 +391,8 @@ function Game() {
       if (globals.mineMap[x][y] === -1) {
         // add score
         globals.players[globals.turn].score++;
+
+        globals.totalFlags++;
         return 1;
         // changes will be propergated later
 
@@ -503,17 +506,27 @@ function Game() {
 
       // For every square
       for (var i = 0; i < globals.squaresX; i++) {
-        globals.mineMap[i] = new Array(globals.squaresX);
-
-        // The lower the dificulty, the more mines
+        globals.mineMap[i] = new Array(globals.squaresY);
         for (var j = 0; j < globals.squaresY; j++) {
-          globals.mineMap[i][j] = Math.floor((Math.random() * defaults.difficulty) - 1);
-
-          if (globals.mineMap[i][j] > 0) {
-            globals.mineMap[i][j] = 0;
-          }
+          globals.mineMap[i][j] = 0;
         }
       }
+      for (var i = 0; i < defaults.mineCount; i++) {
+        do {
+          var x = Math.floor(Math.random() * globals.squaresX);
+          var y = Math.floor(Math.random() * globals.squaresY);
+        } while (!(globals.mineMap[x][y] === 0));
+        globals.mineMap[x][y] = -1;
+      }
+      // The lower the dificulty, the more mines
+      // for (var j = 0; j < globals.squaresY; j++) {
+      //   globals.mineMap[i][j] = Math.floor((Math.random() * defaults.difficulty) - 1);
+
+      //   if (globals.mineMap[i][j] > 0) {
+      //     globals.mineMap[i][j] = 0;
+      //   }
+      // }
+
 
       // Move on to the next step of the setup
       action.calculateMines();
@@ -883,6 +896,8 @@ function Game() {
         revealed: globals.revealedMap,
         // 'mine': globals.mineMap,
         flag: globals.flagMap,
+        totalMines: globals.totalMines,
+        totalFlags: globals.totalFlags,
         masked: this.getStateB()
       };
     },

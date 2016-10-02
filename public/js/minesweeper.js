@@ -60,8 +60,10 @@ $(function () {
     var masked = data.masked;
     var players = data.players;
     var turn = data.turn;
+    var totalMines = data.totalMines;
+    var totalFlags = data.totalFlags;
 
-    util.updateScoreboard(players, turn);
+    util.updateScoreboard(players, turn, totalFlags, totalMines);
     for (var i = 0; i < globals.squaresX; i++) {
       for (var j = 0; j < globals.squaresY; j++) {
         if (revealed[i][j] != globals.revealedMap[i][j]) {
@@ -146,11 +148,12 @@ $(function () {
 
   var defaults = {
     difficulty: 0,
-    celSize: 20,
+    mineCount: 51,
+    celSize: 25,
     width: 400,
     height: 400,
     background: 'white',
-    font: '14px Arial',
+    font: '16px Arial',
     celColor: '#dadada',
     celStroke: 'white',
     celRadius: 5,
@@ -207,6 +210,8 @@ $(function () {
       }
 
       globals.context.font = defaults.font;
+      globals.context.textAlign = 'center';
+      globals.context.textBaseline = 'middle';
 
       defaults.width = globals.canvas.width();
       // globals.squaresX = Math.floor(defaults.width / defaults.celSize);
@@ -315,7 +320,7 @@ $(function () {
       // Reset all global vars to their default value
       globals.gameover = false;
       globals.firstClick = true;
-      globals.totalMines = 0;
+      globals.totalMines = 51;
       globals.totalFlags = 0;
       globals.elapsedTime = 0;
       globals.mineMap = new Array(globals.squaresX);
@@ -404,7 +409,7 @@ $(function () {
       var x = Math.floor((e.pageX - globals.canvas[0].offsetLeft - 1) / defaults.celSize);
       var y = Math.floor((e.pageY - globals.canvas[0].offsetTop - 1) / defaults.celSize);
       if (!globals.revealedMap[x]) return;
-      
+
       var revealed = (globals.revealedMap[x][y]) ? 1 : -1;
 
       // If left-click, not a flag and the game is still going on
@@ -544,6 +549,7 @@ $(function () {
             action.revealMine(x, y);
 
             globals.players[globals.turn].score++;
+
             // console.log(globals.players[0], globals.players[1]);
           }
 
@@ -654,7 +660,7 @@ $(function () {
           // Default colors for the index numbers in an array. [0] not having a color.
           var colorMap = ['none', 'blue', 'green', 'red', 'black', 'orange', 'cyan'];
           globals.context.fillStyle = colorMap[globals.mineMap[x][y]];
-          globals.context.fillText(globals.mineMap[x][y], (x * defaults.celSize) + 5, (y * defaults.celSize) + 16);
+          globals.context.fillText(globals.mineMap[x][y], (x * defaults.celSize) + defaults.celSize / 2, (y * defaults.celSize) + defaults.celSize / 2);
         }
 
         alpha = alpha + .1;
@@ -675,17 +681,20 @@ $(function () {
 
       // For every square
       for (var i = 0; i < globals.squaresX; i++) {
-        globals.mineMap[i] = new Array(globals.squaresX);
-
-        // The lower the dificulty, the more mines
-        for (var j = 0; j < globals.squaresY; j++) {
-          globals.mineMap[i][j] = Math.floor((Math.random() * defaults.difficulty) - 1);
-
-          if (globals.mineMap[i][j] > 0) {
-            globals.mineMap[i][j] = 0;
-          }
-        }
+        globals.mineMap[i] = new Array(globals.squaresY);
       }
+      for (var i = 0; i < defaults.mineCount; i++) {
+
+      }
+      // The lower the dificulty, the more mines
+      // for (var j = 0; j < globals.squaresY; j++) {
+      //   globals.mineMap[i][j] = Math.floor((Math.random() * defaults.difficulty) - 1);
+
+      //   if (globals.mineMap[i][j] > 0) {
+      //     globals.mineMap[i][j] = 0;
+      //   }
+      // }
+
 
       // Move on to the next step of the setup
       action.calculateMines();
@@ -1052,13 +1061,13 @@ $(function () {
         'flag': globals.flagMap
       };
 
-      if (typeof p[what][x] !== 'undefined' && typeof p[what][x][y] !== 'undefined' && p[what][x][y] > -1) {
-        return true;
-      } else {
-        return false;
-      }
+      return (
+        p[what][x] !== undefined &&
+        p[what][x][y] !== undefined &&
+        p[what][x][y] > -1
+      );
     },
-    updateScoreboard: function (players, turn) {
+    updateScoreboard: function (players, turn, found, total) {
       var allOnline = true;
       players.forEach(function (elem, index, array) {
         var $player = $('.player' + index);
@@ -1085,6 +1094,8 @@ $(function () {
         $('#instructions').show()
           .find('h1')
           .html(instruction);
+        $('#instructions>h2').html('' + found + ' / ' + total + ' Found');
+
       } else {
         $('#invite').show();
         $('#instructions').hide();
