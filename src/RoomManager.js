@@ -1,19 +1,23 @@
 var Game = require('./game');
 
-function RoomManager(){
-  this.rooms = [];
+function RoomManager() {
+  this.rooms = {};
+  this.nextRoomID = 0;
 }
 
 // RoomManager.prototype
 
 
-RoomManager.prototype.newRoom = function newRoom(beforeInitCallback, afterInitCallback){
-  var id = this.rooms.length;
+RoomManager.prototype.newRoom = function newRoom(beforeInitCallback, afterInitCallback) {
+  var id = this.nextRoomID;
+  this.nextRoomID++;
+
   var newRoom = {
     id,
-    game: new Game()
+    game: new Game(),
+    lastUsed: Date.now()
   };
-  this.rooms.push(newRoom);
+  this.rooms[id] = newRoom;
 
   beforeInitCallback(newRoom);
 
@@ -21,23 +25,29 @@ RoomManager.prototype.newRoom = function newRoom(beforeInitCallback, afterInitCa
   newRoom.game.core.reset();
 
   afterInitCallback(newRoom);
-
   return newRoom;
 };
 
-RoomManager.prototype.getToken = function getToken(roomID, playerID){
+RoomManager.prototype.getRooms = function getRooms() {
+  var arr = Object.keys(this.rooms).map(function (key) { return this.rooms[key]; }.bind(this));
+  return arr;
+}
+
+
+RoomManager.prototype.getToken = function getToken(roomID, playerID) {
   return this.getRoomByID(roomID).game.globals.players[playerID].token;
 };
 
-RoomManager.prototype.roomExists = function getToken(token){
+RoomManager.prototype.roomExists = function getToken(token) {
   return this.getRoomByToken(token) !== null;
 };
 
-RoomManager.prototype.getRoomByToken = function(token){
-  for(var i=0; i < this.rooms.length; i++){
-    var room = this.rooms[i];
-    for(var j=0; j < room.game.globals.players.length; j++){
-      if(room.game.globals.players[j].token == token){
+RoomManager.prototype.getRoomByToken = function (token) {
+  var rooms = this.getRooms();
+  for (var i = 0; i < rooms.length; i++) {
+    var room = rooms[i];
+    for (var j = 0; j < room.game.globals.players.length; j++) {
+      if (room.game.globals.players[j].token == token) {
         return room;
       }
     }
@@ -45,11 +55,12 @@ RoomManager.prototype.getRoomByToken = function(token){
   return null;
 };
 
-RoomManager.prototype.getPlayerIDByToken = function(token){
-  for(var i=0; i < this.rooms.length; i++){
-    var room = this.rooms[i];
-    for(var j=0; j < room.game.globals.players.length; j++){
-      if(room.game.globals.players[j].token == token){
+RoomManager.prototype.getPlayerIDByToken = function (token) {
+  var rooms = this.getRooms();
+  for (var i = 0; i < rooms.length; i++) {
+    var room = rooms[i];
+    for (var j = 0; j < room.game.globals.players.length; j++) {
+      if (room.game.globals.players[j].token == token) {
         return j;
       }
     }
@@ -57,8 +68,34 @@ RoomManager.prototype.getPlayerIDByToken = function(token){
   return null;
 };
 
-RoomManager.prototype.getRoomByID = function(roomID){
-  return this.rooms[roomID];
+RoomManager.prototype.getRoomByID = function (roomID) {
+  return this.rooms[roomID] || null;
 };
+
+RoomManager.prototype.clearEmptyRooms = function () {
+  // var now = Date.now();
+  // this.rooms.forEach(function (room) {
+  //   if (now - room.lastUsed > this.idleRoomLimit) {
+  //     this.kickAll(room.id);
+  //     this.removeRoom(room.id);
+  //   }
+  // }.bind(this));
+  this.getRooms().forEach(function (room) {
+    var isEmpty = room.game.globals.players.every(function (player) {
+      return player.isOnline === false;
+    });
+    if (isEmpty) {
+      // this.kickAll(room.id);
+      this.removeRoom(room.id);
+    }
+  }.bind(this));
+};
+
+RoomManager.prototype.removeRoom = function (roomID) {
+  console.log('remove room ' + roomID);
+  delete this.rooms[roomID];
+};
+
+
 
 module.exports = RoomManager;

@@ -14,7 +14,6 @@ var app = express();
 // var fs = require("fs");
 
 exports.init = function () {
-  var rooms = new RoomManager();
   var http = require("http").Server(app);
 
   http.listen(HTTP_PORT, () => {
@@ -86,12 +85,13 @@ exports.init = function () {
   app.get('/rooms', function (req, res, next) {
     var host = req.get('host');
     var newRoomLink = req.protocol + '://' + host + '/newRoom';
+    var rooms = roomManager.getRooms();
     res.send(
       '<p>' +
-      roomManager.rooms.length + ' rooms active' + '<br />' +
+      rooms.length + ' rooms active' + '<br />' +
       '<a href="' + newRoomLink + '" target="_blank">Make New Room</a>' +
       '</p>' +
-      roomManager.rooms
+      (rooms
         .map(function (room) {
           return 'Room ' + room.id + ' (mines: ' + room.game.globals.totalMines + ')' + ':<br />' +
             (room.game.globals.players
@@ -107,6 +107,7 @@ exports.init = function () {
             );
         })
         .join('<hr />')
+      )
     )
   });
 
@@ -132,11 +133,12 @@ exports.init = function () {
 
     socket.on("click", function (data) {
       var who = data.who;
-      var token = data.token;
+      // var token = data.token;
       var x = data.x;
       var y = data.y;
 
       var room = roomManager.getRoomByToken(token);
+      var who = roomManager.getPlayerIDByToken(token);
       console.log('room' + room.id + ': [' + who + '] clicks ' + '(' + x + ', ' + y + ')');
 
       if (room.game.globals.turn != who) {
@@ -161,10 +163,19 @@ exports.init = function () {
 
     socket.on("disconnect", function () {
       console.log("disconnected: " + socket.id);
+      var room = roomManager.getRoomByToken(token);
+      var playerID = roomManager.getPlayerIDByToken(token);
+      room.game.globals.players[playerID].isOnline = false;
 
+      sendState(room);
+      roomManager.clearEmptyRooms();
     });
+
     var room = roomManager.getRoomByToken(token);
     socket.join(room.id);
+
+    var playerID = roomManager.getPlayerIDByToken(token);
+    room.game.globals.players[playerID].isOnline = true;
 
     var welcomePack = {
       who: roomManager.getPlayerIDByToken(token)
@@ -183,7 +194,8 @@ exports.init = function () {
       return {
         name: player.name,
         score: player.score,
-        bombs: player.bombs
+        bombs: player.bombs,
+        isOnline: player.isOnline
       }
     });
     state.players = players;

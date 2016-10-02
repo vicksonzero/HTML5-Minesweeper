@@ -66,6 +66,7 @@ function Game() {
     newPlayer: function (name) {
       return {
         name: name,
+        isOnline: false,
         token: randtoken.generate(16, tokenCharSet),
         score: 0,
         bombs: 1

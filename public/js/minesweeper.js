@@ -1054,15 +1054,16 @@ $(function () {
       players.forEach(function (elem, index, array) {
         var $player = $('.player' + index);
         console.log($player);
-        
+
         if (index === turn) {
           $player.css("background-color", "yellow");
-        }else{
+        } else {
           $player.css("background-color", "white");
         }
         $player.find('.name').html(elem.name);
         $player.find('.score').html(elem.score);
         $player.find('.bombs').html(elem.bombs);
+        $player.find('.isOnline').html(elem.isOnline ? "yes" : "no");
 
 
       }, this);
