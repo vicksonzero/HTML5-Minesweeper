@@ -33,7 +33,7 @@ https://vicksonzero.github.io/socketio-Minesweeper
 
 ### End points
 
-1. `GET /` starts a new game
+1. `GET /` starts a new game, join it and show a link for the other player
 2. `GET /?token=TOKEN` joins a game with a token.
 3. `GET /newRoom` starts a new game
 4. `GET /rooms` lists all games

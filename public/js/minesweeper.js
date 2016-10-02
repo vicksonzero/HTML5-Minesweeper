@@ -1,8 +1,8 @@
 /*global $: true, console: true */
 
 
-var WS_HOST = 'localhost';
-var WS_PORT = 3000;
+// var WS_HOST = 'localhost';
+// var WS_PORT = 80;
 
 
 
@@ -19,7 +19,11 @@ $(function () {
   } else {
     console.log('token', params.token[0]);
   }
-  var socket = io.connect(WS_HOST + ':' + WS_PORT, {
+  if (params.fd !== undefined){
+    $('#invite-link').val(location.protocol + '//' + location.host + location.pathname + '?token=' + params.fd[0]);
+  }
+
+  var socket = io.connect({
     query: [
       "&token=" + params.token[0],
     ].join(""),

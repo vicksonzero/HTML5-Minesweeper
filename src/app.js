@@ -1,6 +1,7 @@
 
 
 var socketIO = require("socket.io");
+var path = require('path');
 
 var HTTP_PORT = 80;
 var WS_PORT = 3000;
@@ -21,10 +22,31 @@ exports.init = function () {
     console.log('WS   listening on', WS_PORT);
   });
 
-  app.use(express.static(__dirname + '/../public'));
 
   app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/../public/index.html');
+    var host = req.get('host');
+    console.log('GET / token is ', req.query.token);
+
+    // if player comes with no token
+    if (req.query.token === undefined) {
+      // make a new room and redirect
+      var newRoom = roomManager.newRoom(
+        function (newRoom) {
+
+        },
+        function (newRoom) {
+          newRoom.game.signals.updated.add(function (data) {
+            console.log(data.x, data.y, data.newVal);
+          });
+        }
+      );
+
+      var token = newRoom.game.globals.players[0].token;
+      var fdToken = newRoom.game.globals.players[1].token;
+      res.redirect('/?token=' + token + '&fd=' + fdToken);
+    }
+
+    res.sendFile(path.resolve('public/index.html'));
   });
 
   app.get('/newRoom', function (req, res, next) {
@@ -88,9 +110,11 @@ exports.init = function () {
     )
   });
 
+  app.use(express.static(path.resolve('public')));
+
   app.use('/assets', express.static(__dirname + '/../assets'));
 
-  var io = socketIO.listen(WS_PORT);
+  var io = socketIO.listen(http);
 
 
   io.on("connection", function (socket) {
