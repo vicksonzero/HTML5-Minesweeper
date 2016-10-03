@@ -11,7 +11,7 @@ http://dickson.md/msnSweeper/
 
 Open this link and share the other link with your friend to start.
 
-![Screenshot](https://github.com/vicksonzero/socketio-Minesweeper/blob/master/screenshots/screenshot01.png)
+![Screenshot](https://github.com/vicksonzero/socketio-Minesweeper/blob/master/screenshots/screenshot03.png)
 
 
 ## How to play
