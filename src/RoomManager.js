@@ -74,10 +74,16 @@ RoomManager.prototype.getRoomByID = function (roomID) {
 };
 
 RoomManager.prototype.clearEmptyRooms = function () {
+  var rooms = this.getRooms();
+  if (rooms.length < 1) {
+    return -1;
+  }
+
   var deletedRoomCount = 0;
   var now = Date.now();
   console.log(now);
-  this.getRooms().forEach(function (room) {
+  
+  rooms.forEach(function (room) {
     var isEmpty = room.game.globals.players.every(function (player) {
       return player.isOnline === false;
     });

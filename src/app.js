@@ -9,10 +9,11 @@ var RoomManager = require('./RoomManager');
 var roomManager = new RoomManager();
 
 setInterval(function () {
-  console.log('spring cleaning time');
   var deletedRoomCount = roomManager.clearEmptyRooms();
-  console.log(deletedRoomCount + ' rooms deleted');
-}, 1 * 60 * 1000);
+  if (deletedRoomCount > -1) {
+    console.log('spring cleaning ' + deletedRoomCount + ' rooms deleted');
+  }
+}, 5 * 60 * 1000);
 
 var express = require("express");
 var router = express.Router();
