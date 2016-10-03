@@ -3,6 +3,7 @@ var Game = require('./game');
 function RoomManager() {
   this.rooms = {};
   this.nextRoomID = 0;
+  this.idleRoomLimit = 1 * 60 * 1000; // 1min
 }
 
 // RoomManager.prototype
@@ -73,22 +74,23 @@ RoomManager.prototype.getRoomByID = function (roomID) {
 };
 
 RoomManager.prototype.clearEmptyRooms = function () {
-  // var now = Date.now();
-  // this.rooms.forEach(function (room) {
-  //   if (now - room.lastUsed > this.idleRoomLimit) {
-  //     this.kickAll(room.id);
-  //     this.removeRoom(room.id);
-  //   }
-  // }.bind(this));
+  var deletedRoomCount = 0;
+  var now = Date.now();
+  console.log(now);
   this.getRooms().forEach(function (room) {
     var isEmpty = room.game.globals.players.every(function (player) {
       return player.isOnline === false;
     });
-    if (isEmpty) {
+    console.log('Room ' + room.id + ': ' + (isEmpty ? 'empty ' : '      ') + (now - room.lastUsed));
+    var hasBeenLongTime = now - room.lastUsed > this.idleRoomLimit;
+    if (isEmpty && hasBeenLongTime) {
       // this.kickAll(room.id);
       this.removeRoom(room.id);
+      deletedRoomCount++;
     }
   }.bind(this));
+
+  return deletedRoomCount;
 };
 
 RoomManager.prototype.removeRoom = function (roomID) {

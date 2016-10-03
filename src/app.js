@@ -8,6 +8,12 @@ var WS_PORT = 3010;
 var RoomManager = require('./RoomManager');
 var roomManager = new RoomManager();
 
+setInterval(function () {
+  console.log('spring cleaning time');
+  var deletedRoomCount = roomManager.clearEmptyRooms();
+  console.log(deletedRoomCount + ' rooms deleted');
+}, 1 * 60 * 1000);
+
 var express = require("express");
 var router = express.Router();
 // var fs = require("fs");
@@ -105,7 +111,7 @@ function init() {
     )
   });
 
-  router.get('/socket.io/socket.io.js', function (req, res){
+  router.get('/socket.io/socket.io.js', function (req, res) {
     console.log('socket haha');
     res.setHeader('Content-Type', 'application/javascript');
     res.sendFile(path.join(__dirname, '../node_modules/socket.io-client/socket.io.js'));
@@ -167,12 +173,15 @@ function init() {
       var playerID = roomManager.getPlayerIDByToken(token);
       room.game.globals.players[playerID].isOnline = false;
 
+      room.lastUsed = Date.now();
       sendState(room);
       roomManager.clearEmptyRooms();
     });
 
     var room = roomManager.getRoomByToken(token);
     socket.join(room.id);
+
+    room.lastUsed = Date.now();
 
     var playerID = roomManager.getPlayerIDByToken(token);
     room.game.globals.players[playerID].isOnline = true;
