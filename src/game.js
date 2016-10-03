@@ -372,7 +372,7 @@ function Game() {
 
       // If invalid
       // i.e. square is not revealed, is within boundaries and exists
-      // return -1
+      // abort and return -1
       if (
         x < 0 || y < 0 ||
         x > globals.squaresX || y > globals.squaresY ||
@@ -382,7 +382,7 @@ function Game() {
         return -1;
       }
 
-      // else
+      // ELSE:
 
       // Add revealed square to the revealed array
       globals.revealedMap[x][y] = 1;
@@ -391,7 +391,7 @@ function Game() {
       if (globals.mineMap[x][y] === -1) {
         // add score
         globals.players[globals.turn].score++;
-
+        globals.mineMap[x][y] = -10 * (globals.turn + 1);
         globals.totalFlags++;
         return 1;
         // changes will be propergated later
@@ -885,11 +885,11 @@ function Game() {
         'flag': globals.flagMap
       };
 
-      if (typeof p[what][x] !== 'undefined' && typeof p[what][x][y] !== 'undefined' && p[what][x][y] > -1) {
-        return true;
-      } else {
-        return false;
-      }
+      return (
+        p[what][x] !== undefined &&
+        p[what][x][y] !== undefined &&
+        p[what][x][y] > -1
+      );
     },
     getState: function () {
       return {

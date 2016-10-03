@@ -98,8 +98,9 @@ $(function () {
           globals.mineMap[i][j] = newVal;
           if (newVal === '') {
             // do nothing
-          } else if (newVal === -1) {
-            action.revealMine(i, j);
+          } else if (newVal < 0) {
+            action.fade(i, j);
+            action.revealMine(i, j, newVal);
           } else {
             action.fade(i, j);
           }
@@ -129,6 +130,8 @@ $(function () {
     flagMap: '',
     revealedMap: '',
     maskedMap: '',
+    blueFlagImg: '',
+    redFlagImg: '',
     currentAnimation: '',
     previous: new Array(2),
     squaresX: '',
@@ -161,6 +164,8 @@ $(function () {
     celStroke: 'white',
     celRadius: 5,
     mineImg: 'images/mine.png',
+    blueFlagImg: 'images/blueflag.png',
+    redFlagImg: 'images/redflag.png',
     flagImg: 'images/flag.png',
     newPlayer: function (name) {
       return {
@@ -196,6 +201,13 @@ $(function () {
       globals.canvas = $('#board');
       globals.context = globals.canvas[0].getContext("2d");
       globals.context.background = defaults.background;
+
+      globals.blueFlagImg = new Image();
+      globals.blueFlagImg.src = defaults.blueFlagImg;
+
+      globals.redFlagImg = new Image();
+      globals.redFlagImg.src = defaults.redFlagImg;
+
 
       var ratio = this.hiDPIRatio();
       if (ratio !== 1) {
@@ -666,6 +678,16 @@ $(function () {
           globals.context.fillText(globals.mineMap[x][y], (x * defaults.celSize) + defaults.celSize / 2, (y * defaults.celSize) + defaults.celSize / 2);
         }
 
+        if (globals.mineMap[x][y] === -10) {// [0]
+          globals.context.drawImage(globals.blueFlagImg, x * defaults.celSize, y * defaults.celSize, defaults.celSize, defaults.celSize);
+
+        }
+        if (globals.mineMap[x][y] === -20) {// [1]
+          globals.context.drawImage(globals.redFlagImg, x * defaults.celSize, y * defaults.celSize, defaults.celSize, defaults.celSize);
+
+        }
+
+
         alpha = alpha + .1;
 
         if (alpha >= 1) {
@@ -791,9 +813,18 @@ $(function () {
     // -- @return void
     /* ------------------------------------------- */
 
-    revealMine: function (x, y) {
+    revealMine: function (x, y, mineType) {
       var mine = new Image();
-      mine.src = defaults.mineImg;
+      if (mineType === -10) { // is [0]
+        mine.src = defaults.blueFlagImg;
+
+      } else if (mineType === -20) { // is [1]
+        mine.src = defaults.redFlagImg;
+
+      } else {
+        mine.src = defaults.mineImg;
+
+      }
       mine.onload = function () {
         // Draw the mine
         globals.context.drawImage(mine, x * defaults.celSize, y * defaults.celSize, defaults.celSize, defaults.celSize);
@@ -1081,7 +1112,8 @@ $(function () {
         } else {
           $player.css("background-color", "white");
         }
-        $player.find('.name').html(elem.name);
+        var imgPath = index == 0 ? 'images/blueflag.png' : 'images/redflag.png';
+        $player.find('.name').html('<img src="' + imgPath + '"></img>');
         $player.find('.score').html(elem.score);
         $player.find('.bombs').html(elem.bombs);
         $player.find('.isOnline').html(elem.isOnline ? "yes" : "no");
