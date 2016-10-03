@@ -171,10 +171,13 @@ function init() {
       console.log("disconnected: " + socket.id + ", token: " + token);
       var room = roomManager.getRoomByToken(token);
       var playerID = roomManager.getPlayerIDByToken(token);
-      room.game.globals.players[playerID].isOnline = false;
 
-      room.lastUsed = Date.now();
-      sendState(room);
+      // if room exists
+      if (room) {
+        room.game.globals.players[playerID].isOnline = false;
+        room.lastUsed = Date.now();
+        sendState(room);
+      }
       roomManager.clearEmptyRooms();
     });
 

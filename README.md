@@ -74,7 +74,7 @@ I have no idea why, but you need to fill in actual ip address for socket.io stuf
 1. Use bootstrap
 1. clean up commented unused code
 1. use view engines to inject data
-1. use colored flags to distinguish mines flagged by different players
+1. ~~use colored flags to distinguish mines flagged by different players~~
 1. 5x5 bombs (well.....)
 1. mobile-friendly
 
