@@ -9,6 +9,8 @@ Real-time, Multiplayer MSN-Minesweeper game using socket.io, jQuery and HTML5 ca
 
 http://dickson.md/msnSweeper/
 
+Open this link and share the other link with your friend to start.
+
 ![Screenshot](https://github.com/vicksonzero/socketio-Minesweeper/blob/master/screenshots/screenshot01.png)
 
 
@@ -49,7 +51,7 @@ http://dickson.md/msnSweeper/
 
     var express = require('express');
     var app = express();
-    const msnSweeper = require('src/app');
+    var msnSweeper = require('src/app');
     app.use('/msnSweeper/', msnSweeper);
 
 and serve msnSweeper inside another express module.
@@ -77,12 +79,15 @@ I have no idea why, but you need to fill in actual ip address for socket.io stuf
 1. mobile-friendly
 
 
-## Contribution
+## Bug Reporting and Contributions
 
-Please open issues and/or pull requests. I am more than happy to follow-up.
+Please [open issues](issues) and/or pull requests. I am more than happy to follow-up.
 
 
 ## License
 
 The MIT License (MIT)  
 Copyright (c) 2016 Chui Hin Wah
+
+
+[issues]: https://github.com/vicksonzero/socketio-Minesweeper/issues

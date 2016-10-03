@@ -8,7 +8,14 @@
     "start": "node index.js"
   },
   "author": "Chui Hin Wah Dickson",
-  "git": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vicksonzero/socketio-Minesweeper.git"
+  },
+  "homepage": "http://dickson.md/msnSweeper/",
+  "bugs": {
+    "url": "https://github.com/vicksonzero/socketio-Minesweeper/issues"
+  },
   "license": "MIT",
   "dependencies": {
     "express": "^4.14.0",
