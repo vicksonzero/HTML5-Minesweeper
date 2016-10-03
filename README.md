@@ -81,7 +81,7 @@ I have no idea why, but you need to fill in actual ip address for socket.io stuf
 
 ## Bug Reporting and Contributions
 
-Please [open issues](issues) and/or pull requests. I am more than happy to follow-up.
+Please [open issues][issues] and/or pull requests. I am more than happy to follow-up.
 
 
 ## License
